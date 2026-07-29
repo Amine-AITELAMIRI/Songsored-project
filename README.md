@@ -28,6 +28,32 @@ There are two different boundaries to think about here. The word span marks the 
 
 This gives me a way to inspect the timing errors. It doesn't yet tell me how reliable the method is across songs, and the lab itself doesn't train a detector or censor the audio.
 
+## Comparing aligners
+
+I compared three approaches on 12 confirmed word spans from two songs. Each method received a broad vocal excerpt around the target, without my exact timestamps. This checks alignment within a known region; it doesn't test finding a word anywhere in a song.
+
+| Approach | What I found by listening |
+| --- | --- |
+| [Qwen3 ForcedAligner](https://huggingface.co/Qwen/Qwen3-ForcedAligner-0.6B), given only the target text | Poor proposals in this setup. Supplying an incomplete transcript makes this a limited control, not a general verdict on Qwen. |
+| Meta's multilingual [MMS aligner](https://docs.pytorch.org/audio/2.7.0/generated/torchaudio.pipelines.MMS_FA.html) | Useful boundaries on most examples. |
+| Language-specific CTC models, including [Jonatas Grosman's Arabic model](https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-arabic) | Also useful, but sometimes placed the same word differently. |
+
+These are pretrained models from other projects. My work here was the comparison, review lab, and logic for choosing between proposals. The CTC runs allowed untranscribed surrounding audio; the Qwen control used the target text alone.
+
+My own cursor placements weren't always precise either. I started using listening verdicts as the main check, with differences from my manual timestamps kept as a diagnostic.
+
+## What to do when the models disagree?
+
+First I tried scoring both proposed locations with both CTC models. I also varied the padding around each location to see whether the preference held. All three disagreements stayed unresolved: the models didn't consistently prefer the same proposal.
+
+Then I tried including the surrounding lyrics. Instead of scoring just the target word, I scored the phrase in order, constraining the target to each proposed location. The phrase text was manually prepared; the scorer didn't receive my listening decisions or cursor positions.
+
+- All three phrase-based choices matched the saved listening judgments.
+- Nine agreement cases were carried forward unchanged. They weren't new context tests.
+- The method selected an existing span. It didn't refine the boundaries or establish that they were more precise.
+
+That gives me something to try on new recordings. It's still a small development experiment using previously reviewed examples, not held-out accuracy. The scores aren't word-presence probabilities, and the eight rejected-region controls weren't context-tested. I haven't established a false-positive rate or complete full-song coverage.
+
 ## Next
 
-Compare alignment methods on the reviewed examples and listen to where their boundaries disagree.
+Try complete recordings with untimed lyrics, without supplying known target regions, and review the resulting candidates.
