@@ -54,6 +54,23 @@ Then I tried including the surrounding lyrics. Instead of scoring just the targe
 
 That gives me something to try on new recordings. It's still a small development experiment using previously reviewed examples, not held-out accuracy. The scores aren't word-presence probabilities, and the eight rejected-region controls weren't context-tested. I haven't established a false-positive rate or complete full-song coverage.
 
+## From word proposals to training examples
+
+The next lab runs on complete recordings with untimed lyrics, without my reviewed timestamps or known target regions as inputs.
+
+The first draft transcripts produced no exact target matches. That didn't mean the songs were clean: a missing word or an unrecognized spelling could stop a candidate from reaching alignment. Published lyrics were a better starting point, but still needed preparation.
+
+Later boundary experiments used neighboring lyrics and checked whether proposals stayed stable across audio windows. Recovered candidates went back into the listening lab. Some words were already censored in the source recording, so even a plausible location wasn't enough to call a clip positive.
+
+For the dataset, I'm using these rules:
+
+- **Positive:** a configured target family is audible inside the clip.
+- **Negative:** no configured target is present. This doesn't mean no offensive language of any kind.
+- **Automatic labels:** provisional, even when aligners agree. The confidence checks aren't calibrated probabilities.
+- **Splits:** keep clips from the same recording together, and automatic labels in training only. Artists can still overlap.
+
+The builder is useful for collecting examples. It still depends on lyric coverage, spellings, and the quality of the proposed boundaries.
+
 ## Next
 
-Try complete recordings with untimed lyrics, without supplying known target regions, and review the resulting candidates.
+Build a small CNN and training loop for one-second target-word classification, starting with reviewed examples.
