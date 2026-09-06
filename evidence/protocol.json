@@ -1,0 +1,43 @@
+{
+  "task": "Binary presence of three selected word families in one-second clips",
+  "early_cnn_curves": {
+    "splits": {
+      "train": {
+        "clips": 189,
+        "recordings": 37
+      },
+      "val": {
+        "clips": 41,
+        "recordings": 8
+      }
+    },
+    "seeds": [
+      42,
+      7,
+      21,
+      123,
+      2026
+    ],
+    "pool_size": [
+      1,
+      1
+    ],
+    "optimizer": "Adam",
+    "batch_size": 16,
+    "learning_rate": 0.001,
+    "conditions": {
+      "raw100": {
+        "epochs": 100,
+        "normalize_inputs": false
+      },
+      "norm300": {
+        "epochs": 300,
+        "normalize_inputs": true
+      }
+    },
+    "normalization": "Training-only global log-mel mean and standard deviation",
+    "curves": "Arithmetic mean and sample standard deviation across five seeds, without smoothing",
+    "selection": "Minimum validation BCE separately per seed and epoch budget",
+    "limits": "Compare normalization at equal epochs up to 100. The normalized continuation to 300 has a larger update and selection budget. Same reused validation; no test evaluation."
+  }
+}
