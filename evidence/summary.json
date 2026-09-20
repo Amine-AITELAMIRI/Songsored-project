@@ -1,0 +1,14 @@
+{
+  "representation": {
+    "cnn": {
+      "accuracy_mean": 0.6292682926829268,
+      "accuracy_seed_sd": 0.04363059468292272,
+      "bce_mean": 0.6197542655758741
+    },
+    "frozen_mean": {
+      "accuracy_mean": 0.751219512195122,
+      "accuracy_seed_sd": 0.03180098734245197,
+      "bce_mean": 0.5544611811637878
+    }
+  }
+}

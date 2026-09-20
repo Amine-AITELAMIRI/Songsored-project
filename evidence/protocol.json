@@ -39,5 +39,56 @@
     "curves": "Arithmetic mean and sample standard deviation across five seeds, without smoothing",
     "selection": "Minimum validation BCE separately per seed and epoch budget",
     "limits": "Compare normalization at equal epochs up to 100. The normalized continuation to 300 has a larger update and selection budget. Same reused validation; no test evaluation."
-  }
+  },
+  "shared_settings": {
+    "seeds": [
+      42,
+      7,
+      21,
+      123,
+      2026
+    ],
+    "clip_seconds": 1,
+    "optimizer": "Adam",
+    "learning_rate": 0.001,
+    "weight_decay": 0,
+    "max_updates": 24600,
+    "batch_size": 16,
+    "validation_interval_updates": 82,
+    "selection_checks": 300,
+    "selection": "Minimum original-validation BCE; earliest tie",
+    "threshold": 0.5,
+    "normalization": "Training-only: global log-mel for CNN, per-feature for speech"
+  },
+  "encoder": {
+    "model": "facebook/wav2vec2-xls-r-300m",
+    "revision": "1a640f32ac3e39899438a2931f9924c02f080a54",
+    "frozen": true,
+    "sample_rate": 16000
+  },
+  "cnn_vs_speech": {
+    "splits": {
+      "train": {
+        "clips": 1297,
+        "recordings": 449,
+        "positive": 649,
+        "negative": 648
+      },
+      "val": {
+        "clips": 41,
+        "recordings": 8,
+        "positive": 21,
+        "negative": 20
+      }
+    },
+    "training_labels": {
+      "reviewed": 635,
+      "automatic": 662
+    }
+  },
+  "limitations": [
+    "Recording-separated, not artist-separated; automatic labels in training only.",
+    "Repeatedly used validation and development data; no independent test result. Seeds reuse recordings.",
+    "Matched updates are not matched compute."
+  ]
 }

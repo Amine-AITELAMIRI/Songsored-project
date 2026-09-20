@@ -32,7 +32,7 @@ Later experiments used passage context and stable proposals across windows. Reco
 - **Automatic labels:** provisional, even when the models agree. Confidence gates use stability and boundary checks, not calibrated probabilities.
 - **Splits:** group by source recording and keep automatic labels in training. This does not separate artists.
 
-Collection can use reviewed clips and provisional automatic candidates. [The settings file](../evidence/protocol.json) gives the counts for each reported experiment.
+The corpus grew through reviewed clips and automatic candidates. [The settings file](../evidence/protocol.json) gives the counts for each reported experiment.
 
 ## Still uncertain
 

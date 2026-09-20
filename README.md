@@ -30,9 +30,23 @@ I built the log-mel features, dataset loader, small CNN, and training loop. Afte
 - Continuing to 300 epochs lowered training loss, but validation flattened and later rose. Longer training didn't remove the gap.
 - Weight decay at `1e-4` and frequency masking up to 8 bands didn't give a consistent improvement in their separate trials. I kept zero decay and masking disabled.
 
+## More data, then speech features
+
+I expanded the dataset and checked reviewed-only versus mixed-label training. Mixed labels helped validation loss, but accuracy varied by seed. That didn't settle whether the remaining errors came from labels or the representation.
+
+Next I cached features from frozen XLS-R-300M and trained a linear head on their time averages.
+
+![Paired five-seed comparison of the CNN and frozen XLS-R with a linear head.](assets/cnn_vs_speech.png)
+
+*1,297 training clips / 449 recordings; the same 41 validation clips / 8 recordings. Five seeds, 24,600 Adam updates each, batch size 16, learning rate 0.001, threshold 0.5. Training-only normalization; checkpoints selected by lowest validation BCE. Equal updates are not equal compute.*
+
+- Mean accuracy: **62.9% → 75.1%**. Loss and accuracy improved in every paired seed.
+- A later family-balanced loss improved average family recall but worsened overall validation loss. I kept the unweighted head.
+- These are repeatedly used validation results, not independent test performance. Seed variation doesn't measure uncertainty on new songs.
+
 ## Next
 
-Check the dataset's word coverage and recording diversity, then compare representations on the expanded data. The training loss falling doesn't by itself explain the validation errors.
+Look at the persistent errors and test whether preserving timing information helps. Averaging all frames may be hiding useful word structure, but that still needs an experiment.
 
 ## Check the numbers
 
@@ -52,4 +66,4 @@ python3 -m venv .venv
 
 ## Tools I used
 
-PyTorch and librosa for the classifier and audio features; torchaudio for alignment; [MMS](https://docs.pytorch.org/audio/2.7.0/generated/torchaudio.pipelines.MMS_FA.html), [Qwen3 ForcedAligner](https://huggingface.co/Qwen/Qwen3-ForcedAligner-0.6B), and language-specific CTC models including [Jonatas Grosman's Arabic model](https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-arabic); [Demucs](https://github.com/facebookresearch/demucs) for vocal separation; Genius as a lyric source; Matplotlib for figures. The pretrained models are external work. MMS weights have a noncommercial license.
+PyTorch, torchaudio, Transformers, and librosa; Meta's [XLS-R](https://huggingface.co/facebook/wav2vec2-xls-r-300m) for frozen features; [MMS](https://docs.pytorch.org/audio/2.7.0/generated/torchaudio.pipelines.MMS_FA.html) and language-specific CTC models, including [Jonatas Grosman's Arabic model](https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-arabic), for alignment; [Demucs](https://github.com/facebookresearch/demucs) for vocal separation; Genius as a lyric source; Matplotlib for the plot. The pretrained models are external work. MMS weights have a noncommercial license.
