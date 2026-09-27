@@ -89,6 +89,33 @@
   "limitations": [
     "Recording-separated, not artist-separated; automatic labels in training only.",
     "Repeatedly used validation and development data; no independent test result. Seeds reuse recordings.",
-    "Matched updates are not matched compute."
-  ]
+    "Matched updates are not matched compute; ordered pooling also increases head capacity."
+  ],
+  "ordered_pooling": {
+    "splits": {
+      "train": {
+        "clips": 1428,
+        "recordings": 487,
+        "positive": 705,
+        "negative": 723
+      },
+      "val": {
+        "clips": 41,
+        "recordings": 8,
+        "positive": 21,
+        "negative": 20
+      },
+      "reused_development_panel": {
+        "clips": 70,
+        "recordings": 26,
+        "positive": 42,
+        "negative": 28
+      }
+    },
+    "training_labels": {
+      "reviewed": 713,
+      "automatic": 715
+    },
+    "pooling": "Four chronological means (13/12/12/12 frames), 4096 features, linear head"
+  }
 }

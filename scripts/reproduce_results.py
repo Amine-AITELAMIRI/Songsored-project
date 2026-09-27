@@ -57,6 +57,7 @@ def classification_summary(name, models, expected_n):
 def compute():
     return dict(
         representation=classification_summary('representation_metrics.csv', ['cnn', 'frozen_mean'], 41),
+        centered_development=classification_summary('centered_metrics.csv', ['global_mean', 'ordered'], 70),
     )
 
 

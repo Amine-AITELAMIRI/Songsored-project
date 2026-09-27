@@ -1,4 +1,16 @@
 {
+  "centered_development": {
+    "global_mean": {
+      "accuracy_mean": 0.6885714285714286,
+      "accuracy_seed_sd": 0.03097069055525542,
+      "bce_mean": 0.6057549410632679
+    },
+    "ordered": {
+      "accuracy_mean": 0.7971428571428572,
+      "accuracy_seed_sd": 0.04449260429256413,
+      "bce_mean": 0.41776395316011206
+    }
+  },
   "representation": {
     "cnn": {
       "accuracy_mean": 0.6292682926829268,

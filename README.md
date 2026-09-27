@@ -14,39 +14,45 @@ Speech-to-text support for Darija also doesn't guarantee reliable rap transcript
 
 ## First, I needed examples
 
-I used lyrics and alignment models to propose word locations, then listened to clips in a local review lab. Recording-separated splits keep clips from the same song together; automatic labels stay in training.
+I used lyrics and alignment models to propose word locations, then listened to clips in a review lab. My implementation work includes the dataset loader, feature extraction, CNN, training loop, and later the frozen speech-feature wrapper and classification head.
+
+I separated training and validation by recording and kept automatic labels in training. Labels still need care: a confident alignment doesn't guarantee an audible word or a correct crop.
 
 [More on building the dataset and resolving alignment disagreements](docs/dataset-builder.md).
 
-## First: get the CNN working
+## Starting with a CNN, then trying speech features
 
-I built the log-mel features, dataset loader, small CNN, and training loop. After the tiny-subset check, I tried longer runs and compared seeds.
+I started with a small CNN on log-mel spectrograms, then tried frozen XLS-R-300M features with a linear head. Only the head was trained.
 
-![Early CNN training and validation loss, with and without normalization.](assets/cnn_learning_curves.png)
+| Model | Validation BCE ↓ | Accuracy ↑ |
+|---|---:|---:|
+| CNN with global averaging | 0.620 | 62.9% |
+| Frozen XLS-R + linear head | 0.554 | 75.1% |
 
-*189 training clips / 37 recordings; 41 validation clips / 8 other recordings. Mean and shaded sample SD across five seeds. Adam, learning rate 0.001, batch size 16.*
+Both used **1,297 training clips / 449 recordings** and **41 validation clips / 8 other recordings**. These are five-seed means: 24,600 Adam updates per run, batch size 16, and training-only normalization. For each run, I kept the checkpoint with the lowest validation loss (binary cross-entropy, or BCE).
 
-- I kept training-only normalization. Compare the first 100 epochs for an equal-budget view.
-- Continuing to 300 epochs lowered training loss, but validation flattened and later rose. Longer training didn't remove the gap.
-- Weight decay at `1e-4` and frequency masking up to 8 bands didn't give a consistent improvement in their separate trials. I kept zero decay and masking disabled.
+Speech features helped in every seed. But **75.1% comes from repeatedly used validation data, not an independent test**. Equal updates also don't mean equal compute.
 
-## More data, then speech features
+[The classification experiments, including the approaches I didn't keep](docs/classification-experiments.md).
 
-I expanded the dataset and checked reviewed-only versus mixed-label training. Mixed labels helped validation loss, but accuracy varied by seed. That didn't settle whether the remaining errors came from labels or the representation.
+## Four ordered bins
 
-Next I cached features from frozen XLS-R-300M and trained a linear head on their time averages.
+I divided the frozen speech encoder's frame sequence into four consecutive groups and averaged each group separately. Concatenating those averages gives the linear head a coarse beginning-to-end representation. The encoder remained frozen.
 
-![Paired five-seed comparison of the CNN and frozen XLS-R with a linear head.](assets/cnn_vs_speech.png)
+This also makes the head larger. The experiment changes both temporal information and classifier capacity, so any improvement cannot be attributed to word order alone.
 
-*1,297 training clips / 449 recordings; the same 41 validation clips / 8 recordings. Five seeds, 24,600 Adam updates each, batch size 16, learning rate 0.001, threshold 0.5. Training-only normalization; checkpoints selected by lowest validation BCE. Equal updates are not equal compute.*
+The training set had expanded to 1,428 clips from 487 recordings. The original 41-clip validation set still selected checkpoints. A 70-clip development panel from 26 recordings was used to inspect the selected models; it had already informed development and was not an independent test.
 
-- Mean accuracy: **62.9% → 75.1%**. Loss and accuracy improved in every paired seed.
-- A later family-balanced loss improved average family recall but worsened overall validation loss. I kept the unweighted head.
-- These are repeatedly used validation results, not independent test performance. Seed variation doesn't measure uncertainty on new songs.
+| Representation | Mean accuracy on the centered development panel |
+|---|---:|
+| Global averaging | 68.9% |
+| Four ordered bins | 79.7% |
+
+These are five-seed means with the same 24,600-update budget. They are not directly comparable to the earlier CNN-versus-speech table because the training data and reporting panel changed.
 
 ## Next
 
-Look at the persistent errors and test whether preserving timing information helps. Averaging all frames may be hiding useful word structure, but that still needs an experiment.
+The ordered model looks better on the centered clips, but a full-song detector would encounter words at different positions. Shift the windows and check whether that improvement survives.
 
 ## Check the numbers
 
