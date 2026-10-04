@@ -10,6 +10,24 @@ from reproduce_results import compute, early_history, load
 ROOT = Path(__file__).resolve().parents[1]
 plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 11, 'axes.spines.top': False,
                      'axes.spines.right': False, 'savefig.facecolor': 'white'})
+summary = compute()
+fig, ax = plt.subplots(figsize=(9.4, 4.8), layout='constrained')
+styles = [('global_mean', 'Global mean', '#245c96', 'o'),
+          ('ordered', 'Ordered pooling', '#bd5a28', 's')]
+xs = [-200, -100, 0, 100, 200]
+for key, label, color, marker in styles:
+    values = [summary['position'][key][str(x)]['recall_mean'] * 100 for x in xs]
+    ax.plot(xs, values, label=label, color=color, marker=marker, linewidth=2.3, markersize=7)
+ax.set(title='Word position exposes a weakness in ordered pooling',
+       xlabel='Target displacement from the approved crop (ms; positive = later)',
+       ylabel='Target-positive recall (%)', ylim=(0, 100), xticks=xs)
+ax.grid(axis='y', alpha=.18)
+ax.legend(loc='lower center', frameon=False, ncol=1, fontsize=10)
+fig.suptitle('25 development clips · 21 recordings · mean over 5 seeds · threshold 0.5',
+             y=-.02, fontsize=10, color='#555555')
+fig.savefig(ROOT / 'assets' / 'position_sensitivity.png', dpi=170, bbox_inches='tight', metadata={'Software': 'Matplotlib'})
+plt.close(fig)
+
 history = early_history()
 fig, axes = plt.subplots(1, 2, figsize=(10, 4.1), layout='constrained')
 for condition, label, color, epochs in [
@@ -62,4 +80,4 @@ fig.suptitle('CNN vs speech features: each line follows the same seed', fontsize
 fig.savefig(ROOT / 'assets' / 'cnn_vs_speech.png', dpi=170, bbox_inches='tight',
             metadata={'Software': 'Matplotlib'})
 plt.close(fig)
-print('Rendered figures from aggregate evidence.')
+print('Rendered all three figures from aggregate evidence.')

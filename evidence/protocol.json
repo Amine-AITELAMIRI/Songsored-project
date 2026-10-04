@@ -89,9 +89,10 @@
   "limitations": [
     "Recording-separated, not artist-separated; automatic labels in training only.",
     "Repeatedly used validation and development data; no independent test result. Seeds reuse recordings.",
-    "Matched updates are not matched compute; ordered pooling also increases head capacity."
+    "Matched updates are not matched compute; ordered pooling also increases head capacity.",
+    "Position diagnostic uses eligible positives only and approximate target spans. Context changes with position. No checkpoint reselection on shifted clips."
   ],
-  "ordered_pooling": {
+  "ordered_pooling_and_shifts": {
     "splits": {
       "train": {
         "clips": 1428,
@@ -116,6 +117,18 @@
       "reviewed": 713,
       "automatic": 715
     },
-    "pooling": "Four chronological means (13/12/12/12 frames), 4096 features, linear head"
+    "pooling": "Four chronological means (13/12/12/12 frames), 4096 features, linear head",
+    "common_positive_clips": 25,
+    "common_recordings": 21,
+    "offsets_ms": [
+      -200,
+      -100,
+      0,
+      100,
+      200
+    ],
+    "positive_shift": "Target later in window",
+    "guard_min_span_ms": 120,
+    "guard_edge_margin_ms": 75
   }
 }

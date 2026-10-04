@@ -35,24 +35,23 @@ Speech features helped in every seed. But **75.1% comes from repeatedly used val
 
 [The classification experiments, including the approaches I didn't keep](docs/classification-experiments.md).
 
-## Four ordered bins
+## Keeping more timing information looked promising
 
-I divided the frozen speech encoder's frame sequence into four consecutive groups and averaged each group separately. Concatenating those averages gives the linear head a coarse beginning-to-end representation. The encoder remained frozen.
+I then tried four ordered pooling bins instead of averaging all frames. With expanded training data (**1,428 clips / 487 recordings**), accuracy rose from **68.9% to 79.7%** on a **70-clip / 26-recording development panel**. That panel had already informed development; the original 41 validation clips still selected checkpoints. This isn't directly comparable to the earlier table.
 
-This also makes the head larger. The experiment changes both temporal information and classifier capacity, so any improvement cannot be attributed to word order alone.
+## Then I moved the word inside the window
 
-The training set had expanded to 1,428 clips from 487 recordings. The original 41-clip validation set still selected checkpoints. A 70-clip development panel from 26 recordings was used to inspect the selected models; it had already informed development and was not an independent test.
+I shifted the crops to put words earlier or later. On the same **25 eligible positive clips / 21 recordings**, ordered-pooling recall fell from **85.6% at the original position to 22.4% at 200 ms earlier**.
 
-| Representation | Mean accuracy on the centered development panel |
-|---|---:|
-| Global averaging | 68.9% |
-| Four ordered bins | 79.7% |
+![Recall at different word positions, averaged over five seeds.](assets/position_sensitivity.png)
 
-These are five-seed means with the same 24,600-update budget. They are not directly comparable to the earlier CNN-versus-speech table because the training data and reporting panel changed.
+Recropping changes surrounding audio too, and the target boundaries are approximate. This positive-only diagnostic doesn't measure false alarms.
 
-## Next
+[The ordered-pooling and position-sensitivity experiments in more detail](docs/temporal-structure.md).
 
-The ordered model looks better on the centered clips, but a full-song detector would encounter words at different positions. Shift the windows and check whether that improvement survives.
+## What I want to test next
+
+Train with eligible shifted crops and check whether that helps at different positions without losing the centered-clip performance. Keep the original validation set for checkpoint selection.
 
 ## Check the numbers
 

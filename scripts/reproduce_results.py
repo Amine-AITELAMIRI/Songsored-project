@@ -55,9 +55,25 @@ def classification_summary(name, models, expected_n):
 
 
 def compute():
+    rows = load('position_counts.csv')
+    models = ['global_mean', 'ordered']
+    offsets = [-200, -100, 0, 100, 200]
+    assert len(rows) == 50
+    curves = {}
+    for model in models:
+        curve = {}
+        for offset in offsets:
+            group = [r for r in rows if r['model'] == model and int(r['offset_ms']) == offset]
+            assert len(group) == 5 and {int(r['seed']) for r in group} == SEEDS
+            assert all(int(r['positive_clips']) == 25 and 0 <= int(r['detected']) <= 25 for r in group)
+            rates = [int(r['detected']) / int(r['positive_clips']) for r in group]
+            curve[str(offset)] = dict(recall_mean=mean(rates), recall_seed_sd=stdev(rates))
+        curves[model] = curve
     return dict(
         representation=classification_summary('representation_metrics.csv', ['cnn', 'frozen_mean'], 41),
-        centered_development=classification_summary('centered_metrics.csv', ['global_mean', 'ordered'], 70),
+        centered_development=classification_summary('centered_metrics.csv', models, 70),
+        position=curves,
+        nonzero_offset_recall={m: mean(v['recall_mean'] for k, v in curve.items() if k != '0') for m, curve in curves.items()},
     )
 
 

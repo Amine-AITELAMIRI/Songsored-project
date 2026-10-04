@@ -30,7 +30,7 @@ Next I cached features from frozen XLS-R-300M and trained a linear head on their
 - A later family-balanced loss improved average family recall but worsened overall validation loss. I kept the unweighted head.
 - These are repeatedly used validation results, not independent test performance. Seed variation doesn't measure uncertainty on new songs.
 
-Next I tried preserving timing information with four ordered pooling bins. The current comparison is in the [project log](../README.md#four-ordered-bins).
+Then I tried preserving timing information. The stronger centered-clip results hid a weakness: [moving the word inside the window](temporal-structure.md).
 
 ## Check the figures
 
