@@ -45,23 +45,25 @@ I shifted the crops to put words earlier or later. On the same **25 eligible pos
 
 ![Recall at different word positions, averaged over five seeds.](assets/position_sensitivity.png)
 
+Training with eligible shifted crops raised recall at that earlier position to **52.8%**, but lowered original-position recall to **75.2%**. It helped some positions and hurt others; it didn't solve the problem.
+
 Recropping changes surrounding audio too, and the target boundaries are approximate. This positive-only diagnostic doesn't measure false alarms.
 
 [The ordered-pooling and position-sensitivity experiments in more detail](docs/temporal-structure.md).
 
 ## What I want to test next
 
-Train with eligible shifted crops and check whether that helps at different positions without losing the centered-clip performance. Keep the original validation set for checkpoint selection.
+I'd like to try a small temporal convolutional head over frozen frame features and see whether it handles changes in word position better. I haven't run that experiment yet. Label quality and coverage still need attention too.
 
 ## Check the numbers
 
-The aggregate files reproduce the figures and summaries, not training or audio labels. Audio, lyrics, clip identities, weights, and the development source remain private. [Settings and split counts](evidence/protocol.json).
+The aggregate CSVs reproduce these numbers and the plot, not training or audio labels. Audio, lyrics, clip identities, weights, and the private development source are excluded. [Settings and dataset counts](evidence/protocol.json).
 
 ```bash
 python3 scripts/reproduce_results.py --check
 ```
 
-To redraw the figures with Python 3.11+:
+To redraw the plot with Python 3.11+:
 
 ```bash
 python3 -m venv .venv

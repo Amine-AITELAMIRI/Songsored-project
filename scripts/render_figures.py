@@ -13,7 +13,8 @@ plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 11, 'axes.spines
 summary = compute()
 fig, ax = plt.subplots(figsize=(9.4, 4.8), layout='constrained')
 styles = [('global_mean', 'Global mean', '#245c96', 'o'),
-          ('ordered', 'Ordered pooling', '#bd5a28', 's')]
+          ('ordered', 'Ordered pooling', '#bd5a28', 's'),
+          ('ordered_jitter', 'Ordered + training shifts', '#20806c', '^')]
 xs = [-200, -100, 0, 100, 200]
 for key, label, color, marker in styles:
     values = [summary['position'][key][str(x)]['recall_mean'] * 100 for x in xs]

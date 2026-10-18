@@ -56,9 +56,9 @@ def classification_summary(name, models, expected_n):
 
 def compute():
     rows = load('position_counts.csv')
-    models = ['global_mean', 'ordered']
+    models = ['global_mean', 'ordered', 'ordered_jitter']
     offsets = [-200, -100, 0, 100, 200]
-    assert len(rows) == 50
+    assert len(rows) == 75
     curves = {}
     for model in models:
         curve = {}

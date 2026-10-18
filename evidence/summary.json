@@ -9,11 +9,17 @@
       "accuracy_mean": 0.7971428571428572,
       "accuracy_seed_sd": 0.04449260429256413,
       "bce_mean": 0.41776395316011206
+    },
+    "ordered_jitter": {
+      "accuracy_mean": 0.7714285714285715,
+      "accuracy_seed_sd": 0.045175395145262566,
+      "bce_mean": 0.5863851268275591
     }
   },
   "nonzero_offset_recall": {
     "global_mean": 0.6779999999999999,
-    "ordered": 0.46
+    "ordered": 0.46,
+    "ordered_jitter": 0.614
   },
   "position": {
     "global_mean": {
@@ -58,6 +64,28 @@
       "200": {
         "recall_mean": 0.41600000000000004,
         "recall_seed_sd": 0.021908902300206635
+      }
+    },
+    "ordered_jitter": {
+      "-100": {
+        "recall_mean": 0.68,
+        "recall_seed_sd": 0.09380831519646858
+      },
+      "-200": {
+        "recall_mean": 0.528,
+        "recall_seed_sd": 0.07694153624668539
+      },
+      "0": {
+        "recall_mean": 0.752,
+        "recall_seed_sd": 0.06572670690061992
+      },
+      "100": {
+        "recall_mean": 0.608,
+        "recall_seed_sd": 0.017888543819998333
+      },
+      "200": {
+        "recall_mean": 0.64,
+        "recall_seed_sd": 0.06324555320336757
       }
     }
   },
