@@ -2,3 +2,17 @@
 __pycache__/
 *.pyc
 .DS_Store
+*.egg-info/
+build/
+.pytest_cache/
+*.pt
+*.pth
+*.safetensors
+*.wav
+*.mp3
+*.flac
+.env
+.env.*
+dist/
+local-data/
+local-runs/
