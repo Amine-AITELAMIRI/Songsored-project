@@ -6,7 +6,7 @@ The project's still ongoing, so I'm sharing what I've learned so far here. The m
 
 The idea started with something simple: I wanted to listen to rap when my parents were around without worrying about explicit lyrics coming on. Songsored is my attempt to make that possible for Moroccan rap by finding and eventually censoring selected words.
 
-Right now, I can run a classifier that checks whether a one-second clip contains a target word. Full-song detection and censoring are still missing.
+I started with one-second clips. I can now scan longer audio with the CNN, but it still scores whole windows rather than locating and muting individual words.
 
 Getting the data has been a big part of the challenge. Darija speech resources exist, but I needed reliable, task-specific examples from songs, especially profanity and slurs. I ended up building a focused dataset for this task.
 
@@ -32,7 +32,7 @@ python -m pip install '.[test,train,alignment]'
 python -m pytest -q
 ```
 
-The tests use generated audio and tensors to check the preprocessing, training code, and dataset builder. They don't download pretrained models or measure detection accuracy.
+The tests use generated audio and tensors to check the preprocessing, training code, dataset builder, and sliding windows. They don't download pretrained models or measure detection accuracy.
 
 ### 3. Try a small example
 
@@ -86,9 +86,13 @@ Recropping changes surrounding audio too, and the target boundaries are approxim
 
 [The ordered-pooling and position-sensitivity experiments in more detail](docs/temporal-structure.md).
 
+## Moving beyond clips
+
+I added a [sliding-window runner](songsored/sliding_window.py) that moves the CNN through audio one second at a time, advancing by 100 ms. It returns a score for each window. Those timestamps describe the window, not the word inside it. Incomplete final windows are skipped.
+
 ## What I want to test next
 
-I'd like to try a small temporal convolutional head over frozen frame features and see whether it handles changes in word position better. I haven't run that experiment yet. Label quality and coverage still need attention too.
+Next I want to keep scores over time instead of reducing each window to one score. I'll try a small temporal head over frozen speech features.
 
 ## Check the numbers
 
