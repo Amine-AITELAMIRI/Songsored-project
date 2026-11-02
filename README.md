@@ -6,7 +6,7 @@ The project's still ongoing, so I'm sharing what I've learned so far here. The m
 
 The idea started with something simple: I wanted to listen to rap when my parents were around without worrying about explicit lyrics coming on. Songsored is my attempt to make that possible for Moroccan rap by finding and eventually censoring selected words.
 
-I started with one-second clips. I can now scan longer audio with the CNN, but it still scores whole windows rather than locating and muting individual words.
+I can now score longer audio with the CNN or a temporal speech-feature model. The temporal model keeps scores over time so I can turn them into candidate word intervals. Reliable whole-song censoring is still the goal.
 
 Getting the data has been a big part of the challenge. Darija speech resources exist, but I needed reliable, task-specific examples from songs, especially profanity and slurs. I ended up building a focused dataset for this task.
 
@@ -14,7 +14,7 @@ Speech-to-text support for Darija also doesn't guarantee reliable rap transcript
 
 ## Run the code
 
-I've included the CNN, the frozen XLS-R classifier, and the dataset builder here. The dataset and trained weights are still private. You can run the checks below without them, but you won't get trained word predictions.
+I've included the CNN, the XLS-R classifier and temporal detector, and the dataset builder here. The dataset and trained weights are still private. You can run the checks below without them, but you won't get trained word predictions.
 
 ### 1. Install
 
@@ -32,7 +32,7 @@ python -m pip install '.[test,train,alignment]'
 python -m pytest -q
 ```
 
-The tests use generated audio and tensors to check the preprocessing, training code, dataset builder, and sliding windows. They don't download pretrained models or measure detection accuracy.
+The tests use generated audio and tensors to check the preprocessing, training code, dataset builder, sliding windows, and temporal detection. They don't download pretrained models or measure detection accuracy.
 
 ### 3. Try a small example
 
@@ -90,9 +90,13 @@ Recropping changes surrounding audio too, and the target boundaries are approxim
 
 I added a [sliding-window runner](songsored/sliding_window.py) that moves the CNN through audio one second at a time, advancing by 100 ms. It returns a score for each window. Those timestamps describe the window, not the word inside it. Incomplete final windows are skipped.
 
+## Keeping scores over time
+
+I added a [temporal head](songsored/speech_residual_detector.py) over frozen XLS-R features. The [vocal runner](songsored/vocal_detector.py) uses four-second windows and keeps scores from the middle two seconds. It also loads a learned score correction from the false-trigger work. Running it needs aligned vocals, compatible checkpoints, and a calibrated cutoff; those aren't included here.
+
 ## What I want to test next
 
-Next I want to keep scores over time instead of reducing each window to one score. I'll try a small temporal head over frozen speech features.
+Next I want to compare these target-presence scores with a CTC model that looks for the word's character sequence. Similar-sounding ordinary words are still something to watch.
 
 ## Check the numbers
 
