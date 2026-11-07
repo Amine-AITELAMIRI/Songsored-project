@@ -6,7 +6,7 @@ The project's still ongoing, so I'm sharing what I've learned so far here. The m
 
 The idea started with something simple: I wanted to listen to rap when my parents were around without worrying about explicit lyrics coming on. Songsored is my attempt to make that possible for Moroccan rap by finding and eventually censoring selected words.
 
-I can now score longer audio with the CNN or a temporal speech-feature model. The temporal model keeps scores over time so I can turn them into candidate word intervals. Reliable whole-song censoring is still the goal.
+I can now score longer audio with the CNN or a temporal speech-feature model. I also have a CTC path that looks for target words on the original mix. These give me candidate intervals; I still need to connect them to playback.
 
 Getting the data has been a big part of the challenge. Darija speech resources exist, but I needed reliable, task-specific examples from songs, especially profanity and slurs. I ended up building a focused dataset for this task.
 
@@ -32,7 +32,7 @@ python -m pip install '.[test,train,alignment]'
 python -m pytest -q
 ```
 
-The tests use generated audio and tensors to check the preprocessing, training code, dataset builder, sliding windows, and temporal detection. They don't download pretrained models or measure detection accuracy.
+The tests use generated audio and tensors to check the preprocessing, training code, dataset builder, sliding windows, temporal detection, and CTC scoring and timing. They don't download pretrained models or measure detection accuracy.
 
 ### 3. Try a small example
 
@@ -44,6 +44,14 @@ python -m songsored.inference --smoke
 There are two smoke checks. The CNN one runs a generated tone through the model. The speech-head one starts with a generated feature vector, so it skips XLS-R. Both use random classifier weights. Any prediction from these checks is meaningless, but they let you check that the code runs.
 
 I've put the training and dataset-builder instructions in the [running guide](docs/running-the-code.md). It also shows how to try the real XLS-R encoder and use your own compatible checkpoint to make predictions. The later ordered-pooling and shifted-training speech experiments are still in the private repo.
+
+The [CTC runner](songsored/ctc_detector.py) has an extra dependency:
+
+```bash
+python -m pip install '.[ctc]'
+```
+
+It loads a local OmniASR ONNX model, token file, and trained output adapter. These files aren't included. Installing the extra alone doesn't give you a trained detector.
 
 Reproducing the validation predictions requires the private data and trained weights.
 
@@ -94,9 +102,13 @@ I added a [sliding-window runner](songsored/sliding_window.py) that moves the CN
 
 I added a [temporal head](songsored/speech_residual_detector.py) over frozen XLS-R features. The [vocal runner](songsored/vocal_detector.py) uses four-second windows and keeps scores from the middle two seconds. It also loads a learned score correction from the false-trigger work. Running it needs aligned vocals, compatible checkpoints, and a calibrated cutoff; those aren't included here.
 
+## Looking for the sound sequence with CTC
+
+The other branch uses adapted OmniASR CTC on three-second windows of the original mix. I [score the target character sequences](songsored/ctc_keyword_verifier.py), then [locate them in time](songsored/ctc_keyword_timing.py). It doesn't need supplied lyrics. The runner returns at most one detection per window, so that remains a limitation.
+
 ## What I want to test next
 
-Next I want to compare these target-presence scores with a CTC model that looks for the word's character sequence. Similar-sounding ordinary words are still something to watch.
+Next I'll connect the vocal and CTC detections and use their intervals to mute a copy of the original song. Then I can check what the combined system catches and what it interrupts.
 
 ## Check the numbers
 
@@ -115,6 +127,8 @@ python3 -m venv .venv
 ```
 
 ## Tools I used
+
+The keyword branch uses Meta's OmniASR CTC model through a local ONNX export, plus my output adapter and keyword scoring code. ONNX Runtime runs that export on CPU.
 
 PyTorch, torchaudio, Transformers, and librosa; Meta's [XLS-R](https://huggingface.co/facebook/wav2vec2-xls-r-300m) for frozen features; [MMS](https://docs.pytorch.org/audio/2.7.0/generated/torchaudio.pipelines.MMS_FA.html) and language-specific CTC models, including [Jonatas Grosman's Arabic model](https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-arabic), for alignment; [Demucs](https://github.com/facebookresearch/demucs) for vocal separation; Genius as a lyric source; Matplotlib for the plot. The pretrained models are external work. MMS weights have a noncommercial license.
 
