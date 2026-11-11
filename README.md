@@ -6,7 +6,7 @@ The project's still ongoing, so I'm sharing what I've learned so far here. The m
 
 The idea started with something simple: I wanted to listen to rap when my parents were around without worrying about explicit lyrics coming on. Songsored is my attempt to make that possible for Moroccan rap by finding and eventually censoring selected words.
 
-I can now score longer audio with the CNN or a temporal speech-feature model. I also have a CTC path that looks for target words on the original mix. These give me candidate intervals; I still need to connect them to playback.
+I started by checking one-second clips. In the private prototype, I can now give it a whole song and get back a copy with the detected words muted. So far I've focused on one word family, and it still misses words.
 
 Getting the data has been a big part of the challenge. Darija speech resources exist, but I needed reliable, task-specific examples from songs, especially profanity and slurs. I ended up building a focused dataset for this task.
 
@@ -14,7 +14,7 @@ Speech-to-text support for Darija also doesn't guarantee reliable rap transcript
 
 ## Run the code
 
-I've included the CNN, the XLS-R classifier and temporal detector, and the dataset builder here. The dataset and trained weights are still private. You can run the checks below without them, but you won't get trained word predictions.
+I've included the CNN, the speech detectors, the dataset builder, and the code that combines detections and mutes audio here. The dataset and trained weights are still private. You can run the checks below without them, but you won't get trained word predictions.
 
 ### 1. Install
 
@@ -32,7 +32,7 @@ python -m pip install '.[test,train,alignment]'
 python -m pytest -q
 ```
 
-The tests use generated audio and tensors to check the preprocessing, training code, dataset builder, sliding windows, temporal detection, and CTC scoring and timing. They don't download pretrained models or measure detection accuracy.
+The tests use generated audio and tensors to check the preprocessing, training code, dataset builder, sliding windows, temporal detection, CTC scoring and timing, and audio muting. They don't download pretrained models or measure detection accuracy.
 
 ### 3. Try a small example
 
@@ -52,6 +52,8 @@ python -m pip install '.[ctc]'
 ```
 
 It loads a local OmniASR ONNX model, token file, and trained output adapter. These files aren't included. Installing the extra alone doesn't give you a trained detector.
+
+The [combined runner](songsored/combined_detector.py) takes the original song, an aligned vocal stem, and both configured detectors. It writes a muted WAV and an event list. It doesn't run vocal separation itself. The code is here, but the private checkpoints and calibrated settings are still needed to reproduce my detections.
 
 Reproducing the validation predictions requires the private data and trained weights.
 
@@ -106,9 +108,13 @@ I added a [temporal head](songsored/speech_residual_detector.py) over frozen XLS
 
 The other branch uses adapted OmniASR CTC on three-second windows of the original mix. I [score the target character sequences](songsored/ctc_keyword_verifier.py), then [locate them in time](songsored/ctc_keyword_timing.py). It doesn't need supplied lyrics. The runner returns at most one detection per window, so that remains a limitation.
 
+## Connecting detections to playback
+
+I combine intervals from either branch, merge overlaps, and [mute those samples](songsored/audio_muting.py) in a copy of the original song. The original stays intact. Keeping either branch's detections can recover different words, but it can also add false alarms.
+
 ## What I want to test next
 
-Next I'll connect the vocal and CTC detections and use their intervals to mute a copy of the original song. Then I can check what the combined system catches and what it interrupts.
+Next I want to compare the combined detector with fixed settings on development songs. I'll count located words and background triggers separately. Touching a label isn't enough to show that the mute actually obscures the word.
 
 ## Check the numbers
 
