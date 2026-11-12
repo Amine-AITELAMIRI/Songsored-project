@@ -112,13 +112,15 @@ The other branch uses adapted OmniASR CTC on three-second windows of the origina
 
 I combine intervals from either branch, merge overlaps, and [mute those samples](songsored/audio_muting.py) in a copy of the original song. The original stays intact. Keeping either branch's detections can recover different words, but it can also add false alarms.
 
-## What I want to test next
+## Trying it on whole songs
 
-Next I want to compare the combined detector with fixed settings on development songs. I'll count located words and background triggers separately. Touching a label isn't enough to show that the mute actually obscures the word.
+I narrowed the task to four related forms, `zeb`, `zebi`, `zebbi`, and `zbi`. The detector listens to the song without lyrics or word timestamps. With the settings fixed, it found 15 of 22 labeled words across 36 development songs and missed seven.
+
+Next I want to catch more of those words without muting ordinary words that sound similar. [How the whole-song detector works and where it makes mistakes](docs/whole-song-detection.md).
 
 ## Check the numbers
 
-The aggregate CSVs reproduce these numbers and the plot, not training or audio labels. Audio, lyrics, clip identities, weights, and the rest of the private development source are excluded. [Settings and dataset counts](evidence/protocol.json).
+The command below checks the earlier clip experiments. The [whole-song counts](evidence/whole_song_results.csv) come from the private runs. Audio, lyrics, clip identities, weights, and the rest of the private development source are excluded. [Settings and dataset counts](evidence/protocol.json).
 
 ```bash
 python3 scripts/reproduce_results.py --check
